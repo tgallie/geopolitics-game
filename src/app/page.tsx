@@ -50,7 +50,7 @@ export default function Home() {
           <h2 className="text-xl font-semibold">{selectedCountry.name}</h2>
           <p>Population: {selectedCountry.population.toLocaleString("en-ZA")}</p>
           <p>Starting soldiers: {selectedCountry.baseSoldierValue}</p>
-          <p className="mt-2 text-sm">These population figures are practice data.</p>
+        < p className = "mt-2 text-sm" >Population estimates: Worldometer, 2026.</p>
         </section>
       )}
 
