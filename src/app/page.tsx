@@ -13,6 +13,11 @@ export default function Home() {
     (country) => country.id === selectedCountryId,
   );
 
+    // leave my country out of the list of possible opponents
+    const availableOpponents = countries.filter(
+        (country) => country.id !== selectedCountryId,
+    );
+
   function selectCountry(countryId: string) {
     setSelectedCountryId(countryId);
     // if i change my country, i need to confirm it again
@@ -49,7 +54,8 @@ export default function Home() {
         <section className="mt-6 rounded border border-gray-400 p-4">
           <h2 className="text-xl font-semibold">{selectedCountry.name}</h2>
           <p>Population: {selectedCountry.population.toLocaleString("en-ZA")}</p>
-          <p>Starting soldiers: {selectedCountry.baseSoldierValue}</p>
+        < p > Starting soldiers: { selectedCountry.baseSoldierValue } </p>
+        < p > Possible opponents: { availableOpponents.length } </p>
         < p className = "mt-2 text-sm" >Population estimates: Worldometer, 2026.</p>
         </section>
       )}
