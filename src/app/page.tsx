@@ -99,23 +99,36 @@ export default function Home() {
         </button>
 
         {/* show the opponents picked for this game */ }
+        {/* show my country and the nine opponents on one board */ }
         {
-            isConfirmed && (
-                <section className="mt-6" >
-                    <h2 className="text-xl font-semibold" > Your opponents </h2>
+            isConfirmed && selectedCountry && (
+                <section className="mt-8" >
+                    <h2 className="text-2xl font-semibold" > Game board </h2>
 
-                        < ul className = "mt-3 space-y-2" >
+                        < ul className = "mt-4 grid gap-4 sm:grid-cols-2" >
                         {
-                            opponents.map((country) => (
-                                <li key= { country.id } >
-                                { country.name } — { country.baseSoldierValue } soldiers
+                            [selectedCountry, ...opponents].map((country) => {
+                                // check whether this is my country
+                                const isMyCountry = country.id === selectedCountryId;
+
+                                return (
+                                    <li
+                    key= { country.id }
+                                className = {`rounded border p-4 ${isMyCountry ? "border-blue-600" : "border-gray-400"
+                                    }`
+                            }
+                  >
+                                <h3 className="text-lg font-semibold" > { country.name } </h3>
+
+                                < p > { isMyCountry? "You": "NPC" } </p>
+                                < p > Soldiers: { country.baseSoldierValue } </p>
                             </li>
-                            ))
-                        }
-                            </ul>
-                            </section>
-        )
+                            );
+                        })
         }
+</ul>
+    </section>
+)}
 
       <p className="mt-4" role="status">
         {isConfirmed && selectedCountry
