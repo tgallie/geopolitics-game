@@ -1,5 +1,6 @@
 "use client";
 
+import type { Country } from "@/types/game";
 import { useState } from "react";
 import { countries } from "@/data/countries";
 
@@ -7,6 +8,8 @@ export default function Home() {
   // keep track of the country i picked
   const [selectedCountryId, setSelectedCountryId] = useState<string | null>(null);
   const [isConfirmed, setIsConfirmed] = useState(false);
+    // keep the opponents picked for this game
+  const [opponents, setOpponents] = useState<Country[]>([]);
 
   // use the id to find the full country details
   const selectedCountry = countries.find(
@@ -22,7 +25,30 @@ export default function Home() {
     setSelectedCountryId(countryId);
     // if i change my country, i need to confirm it again
     setIsConfirmed(false);
-  }
+    }
+
+    function confirmCountry() {
+        if (!selectedCountry || availableOpponents.length < 9) {
+            return;
+        }
+
+        // copy the list so i don't change the original
+        const shuffled = [...availableOpponents];
+
+        // shuffle by swapping each country with a random one
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const randomIndex = Math.floor(Math.random() * (i + 1));
+
+            [shuffled[i], shuffled[randomIndex]] = [
+                shuffled[randomIndex],
+                shuffled[i],
+            ];
+        }
+
+        // take the first nine countries from the shuffled list
+        setOpponents(shuffled.slice(0, 9));
+        setIsConfirmed(true);
+    }
 
   return (
     <main className="mx-auto max-w-2xl p-8">
@@ -63,16 +89,37 @@ export default function Home() {
       {/* i cannot confirm until i have picked a country */}
       <button
         type="button"
-        disabled={!selectedCountry || isConfirmed}
-        onClick={() => setIsConfirmed(true)}
+        onClick = { confirmCountry }
+        disabled = {
+          !selectedCountry || isConfirmed || availableOpponents.length < 9
+        }
         className="mt-6 rounded bg-blue-600 px-4 py-3 text-white disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isConfirmed ? "Country confirmed" : "Confirm country"}
-      </button>
+        </button>
+
+        {/* show the opponents picked for this game */ }
+        {
+            isConfirmed && (
+                <section className="mt-6" >
+                    <h2 className="text-xl font-semibold" > Your opponents </h2>
+
+                        < ul className = "mt-3 space-y-2" >
+                        {
+                            opponents.map((country) => (
+                                <li key= { country.id } >
+                                { country.name } — { country.baseSoldierValue } soldiers
+                            </li>
+                            ))
+                        }
+                            </ul>
+                            </section>
+        )
+        }
 
       <p className="mt-4" role="status">
         {isConfirmed && selectedCountry
-          ? `You chose ${selectedCountry.name}. Opponent setup comes next.`
+          ? `You chose ${selectedCountry.name}. Your nine opponents are ready.`
           : ""}
       </p>
     </main>
