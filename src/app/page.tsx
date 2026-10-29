@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { countries } from "@/data/countries";
 import { advanceNpc } from "@/lib/ai/npc-strategy";
 import { GameEngine } from "@/lib/game/game-engine";
@@ -21,6 +21,32 @@ export default function Home() {
   const [toId, setToId] = useState("");
   const [amount, setAmount] = useState(1);
   const [error, setError] = useState("");
+  const [autoPlay, setAutoPlay] = useState(false);
+  const [playbackDelay, setPlaybackDelay] = useState(700);
+
+  // play one NPC decision at a time so i can still see what each one did
+  useEffect(() => {
+    if (!autoPlay || !game || game.phase === "finished") return;
+    const player = game.players.find((item) => item.id === game.currentPlayerId);
+    if (player?.kind !== "npc") return;
+
+    const timer = window.setTimeout(() => {
+      try {
+        if (!engine.current) return;
+        const next = advanceNpc(engine.current);
+        setGame(next);
+        setError("");
+        if (next.phase === "finished" || next.players.find((item) => item.id === next.currentPlayerId)?.kind === "human") {
+          setAutoPlay(false);
+        }
+      } catch (cause) {
+        setAutoPlay(false);
+        setError(cause instanceof Error ? cause.message : "The opponent could not move.");
+      }
+    }, playbackDelay);
+
+    return () => window.clearTimeout(timer);
+  }, [autoPlay, game, playbackDelay]);
 
   function startGame() {
     if (!selectedCountryId) return;
@@ -37,6 +63,7 @@ export default function Home() {
       setToId("");
       setAmount(1);
       setError("");
+      setAutoPlay(false);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not start the game.");
     }
@@ -104,7 +131,20 @@ export default function Home() {
                 <p>Phase: {game.phase} · Reinforcements: {game.reinforcementsRemaining}</p>
               </div>
               {game.phase !== "finished" && !isMyTurn && (
-                <button type="button" onClick={playNpc} className="rounded bg-blue-600 px-4 py-2 text-white">Next NPC move</button>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button type="button" onClick={playNpc} disabled={autoPlay}
+                    className="rounded border border-zinc-400 px-4 py-2 disabled:opacity-50">Next NPC move</button>
+                  <button type="button" onClick={() => setAutoPlay(!autoPlay)}
+                    className="rounded bg-blue-600 px-4 py-2 text-white">{autoPlay ? "Pause" : "Play NPC turns"}</button>
+                  <label>Speed
+                    <select value={playbackDelay} onChange={(event) => setPlaybackDelay(Number(event.target.value))}
+                      className="ml-2 rounded border border-zinc-400 bg-transparent p-2">
+                      <option value={1200}>Slow</option>
+                      <option value={700}>Normal</option>
+                      <option value={100}>Fast forward</option>
+                    </select>
+                  </label>
+                </div>
               )}
             </div>
             {game.phase === "finished" && <p className="mt-3 font-bold">Winner: {game.players.find((player) => player.id === game.winnerId)?.name}</p>}
