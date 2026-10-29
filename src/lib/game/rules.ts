@@ -55,7 +55,8 @@ export function resolveCombatPhase(
     const defend = defenderRolls[index];
     if (attack < defend) attackerLosses++;
     if (attack > defend) defenderLosses++;
-    return { attack, defend, winner: attack === defend ? "tie" : attack > defend ? "attacker" : "defender" };
+    const winner: "tie" | "attacker" | "defender" = attack === defend ? "tie" : attack > defend ? "attacker" : "defender";
+    return { attack, defend, winner };
   });
   const attackerRemaining = attackerSoldiers - attackerLosses;
   const defenderRemaining = defenderSoldiers - defenderLosses;

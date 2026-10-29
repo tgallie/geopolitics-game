@@ -42,4 +42,28 @@ export interface GameState {
   battle: Battle | null;
   winnerId: string | null;
   revision: number;
+  events: GameEvent[];
 }
+
+export interface DicePair {
+  attack: number;
+  defend: number;
+  winner: "attacker" | "defender" | "tie";
+}
+
+export interface GameEvent {
+  sequence: number;
+  round: number;
+  playerId: string;
+  kind: "setup" | "turn" | "decision" | "reinforce" | "transfer" | "attack" | "roll" | "conquest" | "elimination" | "skip" | "victory";
+  message: string;
+  dice?: DicePair[];
+}
+
+export type GameAction =
+  | { type: "reinforce"; countryId: string; amount: number }
+  | { type: "transfer"; fromId: string; toId: string; amount: number }
+  | { type: "attack"; fromId: string; toId: string }
+  | { type: "roll" }
+  | { type: "occupy"; amount: number }
+  | { type: "skip" };
