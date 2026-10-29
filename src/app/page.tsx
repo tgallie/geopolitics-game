@@ -17,6 +17,8 @@ export default function Home() {
   const engine = useRef<GameEngine | null>(null);
   const [game, setGame] = useState<GameState | null>(null);
   const [selectedCountryId, setSelectedCountryId] = useState<string | null>(null);
+  const [countrySearch, setCountrySearch] = useState("");
+  const [soldierFilter, setSoldierFilter] = useState("all");
   const [fromId, setFromId] = useState("");
   const [toId, setToId] = useState("");
   const [amount, setAmount] = useState(1);
@@ -97,6 +99,16 @@ export default function Home() {
   const transferTargets = mine.filter((territory) => territory.country.id !== fromId);
   const battleFrom = game?.territories.find((territory) => territory.country.id === game.battle?.attackingCountryId);
   const battleTo = game?.territories.find((territory) => territory.country.id === game.battle?.defendingCountryId);
+  const selectedCountry = countries.find((country) => country.id === selectedCountryId);
+  // search the available countries without changing the list used to make a game
+  const visibleCountries = countries.filter((country) => {
+    const matchesName = country.name.toLocaleLowerCase().includes(countrySearch.trim().toLocaleLowerCase());
+    const matchesSoldiers = soldierFilter === "all" ||
+      (soldierFilter === "low" && country.baseSoldierValue <= 3) ||
+      (soldierFilter === "medium" && country.baseSoldierValue >= 4 && country.baseSoldierValue <= 6) ||
+      (soldierFilter === "high" && country.baseSoldierValue >= 7);
+    return matchesName && matchesSoldiers;
+  });
 
   return (
     <main className="mx-auto max-w-5xl p-6 text-zinc-900 dark:text-zinc-100 sm:p-10">
@@ -105,8 +117,25 @@ export default function Home() {
         <section className="mt-8">
           <h2 className="text-xl font-semibold">Choose your country</h2>
           <p className="mt-2">Pick your country, then start a game against nine opponents.</p>
+          <div className="mt-6 flex flex-wrap gap-4">
+            <label className="flex flex-col gap-1">Search countries
+              <input type="search" value={countrySearch} onChange={(event) => setCountrySearch(event.target.value)}
+                placeholder="Country name" className="rounded border border-zinc-400 bg-transparent px-3 py-2" />
+            </label>
+            <label className="flex flex-col gap-1">Starting soldiers
+              <select value={soldierFilter} onChange={(event) => setSoldierFilter(event.target.value)}
+                className="rounded border border-zinc-400 bg-transparent px-3 py-2">
+                <option value="all">All strengths</option>
+                <option value="low">1–3 soldiers</option>
+                <option value="medium">4–6 soldiers</option>
+                <option value="high">7–9 soldiers</option>
+              </select>
+            </label>
+          </div>
+          <p className="mt-3 text-sm" role="status">Showing {visibleCountries.length} of {countries.length} countries.</p>
+          {visibleCountries.length === 0 && <p className="mt-4">No countries match. Try another name or strength.</p>}
           <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {countries.map((country) => (
+            {visibleCountries.map((country) => (
               <li key={country.id}>
                 <button type="button" onClick={() => setSelectedCountryId(country.id)}
                   aria-pressed={selectedCountryId === country.id}
@@ -117,6 +146,9 @@ export default function Home() {
               </li>
             ))}
           </ul>
+          {selectedCountry && (
+            <p className="mt-5">Selected: <strong>{selectedCountry.name}</strong> · Population {selectedCountry.population.toLocaleString("en-ZA")} ({selectedCountry.populationYear}).</p>
+          )}
           <button type="button" onClick={startGame} disabled={!selectedCountryId}
             className="mt-6 rounded bg-blue-600 px-5 py-3 font-semibold text-white disabled:opacity-50">
             Start game
