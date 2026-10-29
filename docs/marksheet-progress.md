@@ -41,8 +41,9 @@ occupation phase. Victory is recorded after occupation, leaving all countries oc
 5. Real LLM commentary integration, failure handling, end-to-end verification,
    one explicit bonus feature and submission documentation.
 
-The population list is currently a 12-country subset. Expand it to the brief's
-world-country selection before calling the application complete.
+The population list now contains all 234 country and dependency entries in the
+Worldometer 2026 table. The selection screen identifies that the source includes
+dependent territories. Saved games must keep their own population snapshots.
 
 ## Criteria and evidence
 

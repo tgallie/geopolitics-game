@@ -117,6 +117,7 @@ export default function Home() {
         <section className="mt-8">
           <h2 className="text-xl font-semibold">Choose your country</h2>
           <p className="mt-2">Pick your country, then start a game against nine opponents.</p>
+          <p className="mt-2 text-sm">The 2026 population list also includes dependent territories, as listed by <a href="https://www.worldometers.info/world-population/population-by-country/" target="_blank" rel="noreferrer" className="underline">Worldometer</a>.</p>
           <div className="mt-6 flex flex-wrap gap-4">
             <label className="flex flex-col gap-1">Search countries
               <input type="search" value={countrySearch} onChange={(event) => setCountrySearch(event.target.value)}
