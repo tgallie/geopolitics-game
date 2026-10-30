@@ -120,7 +120,13 @@ test("ties cause no casualties and failed attacks retain both territories", () =
 test("conquest gives original-value reward, requires occupation and skips eliminated player", () => {
   const { engine, rolls } = fixture();
   move(engine, { type: "attack", fromId: "C0", toId: "C1" });
+  const attackEvent = engine.snapshot.events.at(-1);
+  assert.equal(attackEvent.fromCountryId, "C0");
+  assert.equal(attackEvent.toCountryId, "C1");
   while (engine.snapshot.phase === "combat") winPhase(engine, rolls);
+  const conquestEvent = engine.snapshot.events.find(event => event.kind === "conquest");
+  assert.deepEqual([conquestEvent.fromCountryId, conquestEvent.toCountryId], ["C0", "C1"]);
+  assert.ok(engine.snapshot.events.some(event => event.kind === "roll" && event.fromCountryId === "C0" && event.toCountryId === "C1"));
   assert.equal(engine.snapshot.territories[0].soldiers, 13);
   assert.equal(engine.snapshot.phase, "conquest");
   assert.throws(() => move(engine, { type: "skip" }));

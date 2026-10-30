@@ -44,6 +44,14 @@ occupation phase. Victory is recorded after occupation, leaving all countries oc
 The available list contains the 32 countries selected by the user, with 2026
 population estimates from Worldometer. Saved games must keep their own population snapshots.
 
+The playable board now draws geographic regions from Natural Earth 1:50m
+boundaries through World Atlas. The generated local paths are snapped to a square
+grid for the chosen pixel-art style. The ten active territories are coloured by
+owner, show soldier counts, and can be selected on the map. Attack, dice and
+capture events animate between the source and target regions; the country list
+remains visible below the map. These boundaries are a cartographic approximation,
+not precise legal borders. Regenerate the paths with `node scripts/build-map-data.mjs`.
+
 ## Criteria and evidence
 
 | Marksheet criterion | Current evidence / remaining work |

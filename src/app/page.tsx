@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { WorldGameMap } from "@/components/world-game-map";
 import { countries } from "@/data/countries";
 import { advanceNpc } from "@/lib/ai/npc-strategy";
 import { GameEngine } from "@/lib/game/game-engine";
@@ -91,6 +92,14 @@ export default function Home() {
     }
   }
 
+  function selectOnMap(countryId: string) {
+    if (!game || game.players.find((player) => player.id === game.currentPlayerId)?.kind !== "human") return;
+    const territory = game.territories.find((item) => item.country.id === countryId);
+    if (!territory) return;
+    if (territory.ownerId === game.currentPlayerId) setFromId(countryId);
+    else if (game.phase === "action") setToId(countryId);
+  }
+
   const currentPlayer = game?.players.find((player) => player.id === game.currentPlayerId);
   const isMyTurn = currentPlayer?.kind === "human" && game?.phase !== "finished";
   const mine = game?.territories.filter((territory) => territory.ownerId === game.currentPlayerId) ?? [];
@@ -174,7 +183,7 @@ export default function Home() {
                       className="ml-2 rounded border border-zinc-400 bg-transparent p-2">
                       <option value={1200}>Slow</option>
                       <option value={700}>Normal</option>
-                      <option value={100}>Fast forward</option>
+                      <option value={350}>Fast forward</option>
                     </select>
                   </label>
                 </div>
@@ -185,7 +194,10 @@ export default function Home() {
 
           <section className="mt-8" aria-label="Game board">
             <h2 className="text-2xl font-semibold">Game board</h2>
-            <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <p className="mb-4 mt-2">Click a country on the map to choose your source or attack target. Square markers show soldiers.</p>
+            <WorldGameMap game={game} fromId={fromId} toId={toId} onSelect={selectOnMap} />
+            <h3 className="mt-7 text-lg font-semibold">Countries in this game</h3>
+            <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {game.territories.map((territory) => {
                 const owner = game.players.find((player) => player.id === territory.ownerId);
                 return (

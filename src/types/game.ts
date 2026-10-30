@@ -58,6 +58,8 @@ export interface GameEvent {
   kind: "setup" | "turn" | "decision" | "reinforce" | "transfer" | "attack" | "roll" | "conquest" | "elimination" | "skip" | "victory";
   message: string;
   dice?: DicePair[];
+  fromCountryId?: string;
+  toCountryId?: string;
 }
 
 export type GameAction =

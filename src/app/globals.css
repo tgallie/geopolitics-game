@@ -24,3 +24,28 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@keyframes map-conflict {
+  from { stroke-dashoffset: 36; opacity: 0; }
+  30% { opacity: 1; }
+  to { stroke-dashoffset: 0; opacity: 1; }
+}
+
+@keyframes map-impact {
+  from { opacity: 0; transform: scale(0.5); }
+  50% { opacity: 1; transform: scale(1.7); }
+  to { opacity: 0; transform: scale(1); }
+}
+
+@keyframes map-capture {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(2); }
+}
+
+.map-conflict { animation: map-conflict 700ms steps(8) both; }
+.map-impact { transform-box: fill-box; transform-origin: center; animation: map-impact 700ms steps(4) both; }
+.map-capture { animation: map-capture 900ms steps(4) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .map-conflict, .map-impact, .map-capture { animation: none; }
+}

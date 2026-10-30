@@ -92,8 +92,8 @@ export class GameEngine {
     return state.players.find((player) => player.id === state.currentPlayerId)!.name;
   }
 
-  private record(state: GameState, kind: GameEvent["kind"], message: string, dice?: GameEvent["dice"]) {
-    state.events.push({ sequence: state.events.length + 1, round: state.round, playerId: state.currentPlayerId, kind, message, ...(dice ? { dice } : {}) });
+  private record(state: GameState, kind: GameEvent["kind"], message: string, dice?: GameEvent["dice"], countries?: Pick<GameEvent, "fromCountryId" | "toCountryId">) {
+    state.events.push({ sequence: state.events.length + 1, round: state.round, playerId: state.currentPlayerId, kind, message, ...(dice ? { dice } : {}), ...countries });
   }
 
   private territory(state: GameState, id: string): Territory {
@@ -142,7 +142,7 @@ export class GameEngine {
         state.battle = { attackingCountryId: action.fromId, defendingCountryId: action.toId, phaseNumber: 0 };
         state.attackUsedThisTurn = true;
         state.phase = "combat";
-        this.record(state, "attack", `${from.country.name} attacks ${to.country.name}.`);
+        this.record(state, "attack", `${from.country.name} attacks ${to.country.name}.`, undefined, { fromCountryId: action.fromId, toCountryId: action.toId });
         return;
       }
       case "roll": {
@@ -153,14 +153,14 @@ export class GameEngine {
         from.soldiers = result.attackerRemaining;
         to.soldiers = result.defenderRemaining;
         state.battle.phaseNumber++;
-        this.record(state, "roll", `${from.country.name} loses ${result.attackerLosses}; ${to.country.name} loses ${result.defenderLosses}.`, result.pairs);
+        this.record(state, "roll", `${from.country.name} loses ${result.attackerLosses}; ${to.country.name} loses ${result.defenderLosses}.`, result.pairs, { fromCountryId: from.country.id, toCountryId: to.country.id });
         if (result.conquered) {
           const previousOwner = to.ownerId;
           to.ownerId = state.currentPlayerId;
           const reward = conquestReward(to.country.baseSoldierValue);
           from.soldiers += reward;
           state.phase = "conquest";
-          this.record(state, "conquest", `${to.country.name} is conquered. ${reward} bonus soldiers join ${from.country.name}; choose how many to move into the new country.`);
+          this.record(state, "conquest", `${to.country.name} is conquered. ${reward} bonus soldiers join ${from.country.name}; choose how many to move into the new country.`, undefined, { fromCountryId: from.country.id, toCountryId: to.country.id });
           if (!state.territories.some((country) => country.ownerId === previousOwner)) {
             this.record(state, "elimination", `${state.players.find((player) => player.id === previousOwner)!.name} has lost their last country.`);
           }
