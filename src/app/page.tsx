@@ -120,10 +120,10 @@ export default function Home() {
   });
 
   return (
-    <main className="mx-auto max-w-5xl p-6 text-zinc-900 dark:text-zinc-100 sm:p-10">
+    <main className="game-interface mx-auto w-full max-w-7xl p-4 text-slate-900 sm:p-8">
       <h1 className="text-3xl font-bold">Geopolitics game</h1>
       {!game ? (
-        <section className="mt-8">
+        <section className="setup-panel mt-6">
           <h2 className="text-xl font-semibold">Choose your country</h2>
           <p className="mt-2">Pick your country, then start a game against nine opponents.</p>
           <p className="mt-2 text-sm">Choose from 32 countries. Population estimates for 2026 come from <a href="https://www.worldometers.info/world-population/population-by-country/" target="_blank" rel="noreferrer" className="underline">Worldometer</a>.</p>
@@ -160,7 +160,7 @@ export default function Home() {
             <p className="mt-5">Selected: <strong>{selectedCountry.name}</strong> · Population {selectedCountry.population.toLocaleString("en-ZA")} ({selectedCountry.populationYear}).</p>
           )}
           <button type="button" onClick={startGame} disabled={!selectedCountryId}
-            className="mt-6 rounded bg-blue-600 px-5 py-3 font-semibold text-white disabled:opacity-50">
+            className="start-game mt-6 rounded bg-blue-600 px-5 py-3 font-semibold text-white disabled:opacity-50">
             Start game
           </button>
         </section>
@@ -169,8 +169,8 @@ export default function Home() {
           <section className="mt-8 rounded border border-zinc-400 p-5" aria-label="Turn status">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h2 className="text-xl font-semibold">Round {game.round}: {currentPlayer?.name}</h2>
-                <p>Phase: {game.phase} · Reinforcements: {game.reinforcementsRemaining}</p>
+                <h2 className="text-xl font-semibold">{isMyTurn ? "Your turn" : `${currentPlayer?.name} is playing`} · Round {game.round}</h2>
+                <p className="mt-2 text-slate-600">{game.phase === "reinforcement" ? `Place ${game.reinforcementsRemaining} new soldiers.` : game.phase === "combat" ? "Battle in progress" : game.phase === "conquest" ? "Move soldiers into the captured country." : game.phase === "finished" ? "Game complete" : isMyTurn ? "Choose a target to attack, or end your turn." : "Watch the opponents, or use Play to continue."}</p>
               </div>
               {game.phase !== "finished" && !isMyTurn && (
                 <div className="flex flex-wrap items-center gap-2">
@@ -192,7 +192,7 @@ export default function Home() {
             {game.phase === "finished" && <p className="mt-3 font-bold">Winner: {game.players.find((player) => player.id === game.winnerId)?.name}</p>}
           </section>
 
-          <section className="mt-8" aria-label="Game board">
+          <div className="play-layout"><section className="mt-6" aria-label="Game board">
             <h2 className="text-2xl font-semibold">Game board</h2>
             <p className="mb-4 mt-2">Click a square marker to choose your source or attack target. The number shows soldiers.</p>
             <WorldGameMap game={game} fromId={fromId} toId={toId} onSelect={selectOnMap} />
@@ -211,7 +211,7 @@ export default function Home() {
           </section>
 
           {isMyTurn && (
-            <section className="mt-8 rounded border border-zinc-400 p-5" aria-label="Your move">
+            <section className="move-panel mt-6 rounded border border-zinc-400 p-5" aria-label="Your move">
               <h2 className="text-xl font-semibold">Your move</h2>
               {game.phase === "reinforcement" && <p className="mt-2">Place your {game.reinforcementsRemaining} reinforcements before taking an action.</p>}
               {(game.phase === "reinforcement" || game.phase === "action") && (
@@ -273,9 +273,10 @@ export default function Home() {
             </section>
           )}
 
+          </div>
           <section className="mt-8" aria-label="Game events">
             <h2 className="text-xl font-semibold">What happened</h2>
-            <ol className="mt-3 space-y-2" aria-live="polite">
+            <ol className="event-list mt-3 space-y-2" aria-live="polite">
               {[...game.events].reverse().slice(0, 20).map((event) => (
                 <li key={event.sequence} className="rounded border border-zinc-300 p-3 dark:border-zinc-700">
                   <span className="font-semibold">Round {event.round}:</span> {event.message}
