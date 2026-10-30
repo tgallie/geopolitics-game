@@ -1,6 +1,7 @@
 "use client";
 
-import map from "@/data/world-map-paths.json";
+// positions are matched to the generated artwork, on its original 2:1 canvas
+const map = { width: 960, height: 480, regions: [{"name":"Argentina","center":[260,420]},{"name":"Australia","center":[810,390]},{"name":"Bangladesh","center":[702,245]},{"name":"Brazil","center":[285,340]},{"name":"Canada","center":[190,120]},{"name":"China","center":[735,205]},{"name":"Egypt","center":[540,245]},{"name":"Ethiopia","center":[560,300]},{"name":"France","center":[455,185]},{"name":"Germany","center":[477,171]},{"name":"India","center":[655,270]},{"name":"Indonesia","center":[760,333]},{"name":"Iran","center":[600,242]},{"name":"Italy","center":[485,200]},{"name":"Japan","center":[830,207]},{"name":"Kenya","center":[555,330]},{"name":"Mexico","center":[150,240]},{"name":"Nigeria","center":[445,290]},{"name":"Pakistan","center":[620,245]},{"name":"Philippines","center":[800,285]},{"name":"Russia","center":[715,120]},{"name":"Saudi Arabia","center":[565,270]},{"name":"South Africa","center":[475,407]},{"name":"South Korea","center":[814,204]},{"name":"Spain","center":[415,208]},{"name":"Switzerland","center":[465,188]},{"name":"Thailand","center":[715,280]},{"name":"Turkey","center":[530,205]},{"name":"United Arab Emirates","center":[590,274]},{"name":"United Kingdom","center":[413,155]},{"name":"United States of America","center":[175,195]},{"name":"Vietnam","center":[730,275]}] };
 import type { GameState } from "@/types/game";
 
 const npcColors = ["#b45309", "#7c3aed", "#b91c1c", "#047857", "#a21caf", "#9a3412", "#0f766e", "#a16207", "#be185d"];
@@ -28,30 +29,7 @@ export function WorldGameMap({ game, fromId, toId, onSelect }: WorldGameMapProps
   return (
     <div className="overflow-x-auto border-4 border-slate-800 bg-sky-200 shadow-[8px_8px_0_#0f172a]">
       <svg viewBox={`0 0 ${map.width} ${map.height}`} className="block h-auto min-w-[720px] w-full" aria-label="Interactive world map showing countries in this game">
-        <defs>
-          <pattern id="ocean-tiles" width="24" height="24" patternUnits="userSpaceOnUse">
-            <rect width="24" height="24" fill="#b9e6f7" />
-            <rect width="12" height="12" fill="#9bd8ee" />
-            <rect x="12" y="12" width="12" height="12" fill="#9bd8ee" />
-          </pattern>
-        </defs>
-        <rect width={map.width} height={map.height} fill="url(#ocean-tiles)" />
-        {map.regions.map((region) => {
-          const territory = territories.get(region.name);
-          const color = territory ? ownerColors.get(territory.ownerId) : "#d8e4d5";
-          const chosen = territory && (territory.country.id === fromId || territory.country.id === toId);
-          const capturing = animateBattle && latestBattle?.kind === "conquest" && territory?.country.id === latestBattle.toCountryId;
-          return (
-            <path key={region.name} d={region.path} fill={color} stroke={chosen ? "#facc15" : "#334155"}
-              strokeWidth={chosen ? 3 : 0.8} className={`${territory ? "cursor-pointer hover:brightness-125" : ""} ${capturing ? "map-capture" : ""}`}
-              role={territory ? "button" : undefined} tabIndex={territory ? 0 : undefined}
-              aria-label={territory ? `${territory.country.name}, ${territory.soldiers} soldiers, owned by ${game.players.find((player) => player.id === territory.ownerId)?.name}` : undefined}
-              onClick={territory ? () => select(territory.country.id) : undefined}
-              onKeyDown={territory ? (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); select(territory.country.id); } } : undefined}>
-              <title>{territory ? `${territory.country.name}: ${territory.soldiers} soldiers` : region.name}</title>
-            </path>
-          );
-        })}
+        <image href="/pixel-world-map-blocky.png" width="960" height="480" preserveAspectRatio="xMidYMid meet" />
         {animateBattle && fromRegion && toRegion && (
           <g key={latestBattle.sequence} className="pointer-events-none">
             <line x1={fromRegion.center[0]} y1={fromRegion.center[1]} x2={toRegion.center[0]} y2={toRegion.center[1]}
@@ -68,7 +46,7 @@ export function WorldGameMap({ game, fromId, toId, onSelect }: WorldGameMapProps
               onClick={() => select(territory.country.id)}
               onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); select(territory.country.id); } }}>
               <rect x={region.center[0] - 10} y={region.center[1] - 10} width="20" height="20"
-                fill={ownerColors.get(territory.ownerId)} stroke="#fff" strokeWidth="2" />
+                fill={ownerColors.get(territory.ownerId)} stroke={territory.country.id === fromId || territory.country.id === toId ? "#facc15" : "#fff"} strokeWidth="2" className={animateBattle && latestBattle?.kind === "conquest" && territory.country.id === latestBattle.toCountryId ? "map-capture" : ""} />
               <text x={region.center[0]} y={region.center[1] + 4} textAnchor="middle" fill="white" fontSize="12" fontWeight="bold" pointerEvents="none">{territory.soldiers}</text>
               <title>{territory.country.name}: {territory.soldiers} soldiers</title>
             </g>
@@ -76,11 +54,10 @@ export function WorldGameMap({ game, fromId, toId, onSelect }: WorldGameMapProps
         })}
       </svg>
       <div className="flex flex-wrap gap-x-5 gap-y-2 border-t-4 border-slate-800 bg-white px-4 py-3 text-sm text-slate-900">
-        <span className="flex items-center gap-2"><span className="inline-block h-4 w-4 bg-blue-700" />Your countries</span>
-        <span className="flex items-center gap-2"><span className="inline-block h-4 w-4 bg-amber-700" />NPC countries (each has its own colour)</span>
-        <span className="flex items-center gap-2"><span className="inline-block h-4 w-4 bg-slate-200" />Outside this game</span>
+        <span className="flex items-center gap-2"><span className="inline-block h-4 w-4 bg-blue-700" />Your markers</span>
+        <span className="flex items-center gap-2"><span className="inline-block h-4 w-4 bg-amber-700" />NPC markers (colour shows owner)</span>
       </div>
-      <p className="bg-white px-4 pb-3 text-xs text-slate-600">Country outlines adapted from <a className="underline" href="https://www.naturalearthdata.com/downloads/50m-cultural-vectors/" target="_blank" rel="noreferrer">Natural Earth</a> through <a className="underline" href="https://github.com/topojson/world-atlas" target="_blank" rel="noreferrer">World Atlas</a>.</p>
+      <p className="bg-white px-4 pb-3 text-xs text-slate-600">Select a square marker to choose a country. Marker colours show ownership; the artwork keeps its original colours.</p>
     </div>
   );
 }

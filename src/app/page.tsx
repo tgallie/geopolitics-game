@@ -194,7 +194,7 @@ export default function Home() {
 
           <section className="mt-8" aria-label="Game board">
             <h2 className="text-2xl font-semibold">Game board</h2>
-            <p className="mb-4 mt-2">Click a country on the map to choose your source or attack target. Square markers show soldiers.</p>
+            <p className="mb-4 mt-2">Click a square marker to choose your source or attack target. The number shows soldiers.</p>
             <WorldGameMap game={game} fromId={fromId} toId={toId} onSelect={selectOnMap} />
             <h3 className="mt-7 text-lg font-semibold">Countries in this game</h3>
             <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
