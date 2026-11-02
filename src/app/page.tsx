@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { GameTutorial } from "@/components/game-tutorial";
 import { WorldGameMap } from "@/components/world-game-map";
 import { countries } from "@/data/countries";
 import { advanceNpc } from "@/lib/ai/npc-strategy";
@@ -121,7 +122,7 @@ export default function Home() {
 
   return (
     <main className="game-interface mx-auto w-full max-w-7xl p-4 text-slate-900 sm:p-8">
-      <header className="game-header"><p className="game-eyebrow">WORLD CONQUEST</p><h1 className="text-3xl font-bold">Geopolitics game</h1><p>Choose your country. Build your army. Conquer all 10 countries to win.</p></header>
+      <header className="game-header"><p className="game-eyebrow">WORLD CONQUEST</p><h1 className="text-3xl font-bold">Geopolitics game</h1><p>Choose your country. Build your army. Conquer all 10 countries to win.</p><GameTutorial onOpen={() => setAutoPlay(false)} /></header>
       {!game ? (
         <section className="setup-panel mt-6">
           <h2 className="text-xl font-semibold">1. Choose your country</h2>
