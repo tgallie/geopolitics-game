@@ -121,10 +121,10 @@ export default function Home() {
 
   return (
     <main className="game-interface mx-auto w-full max-w-7xl p-4 text-slate-900 sm:p-8">
-      <h1 className="text-3xl font-bold">Geopolitics game</h1>
+      <header className="game-header"><p className="game-eyebrow">WORLD CONQUEST</p><h1 className="text-3xl font-bold">Geopolitics game</h1><p>Choose your country. Build your army. Conquer all 10 countries to win.</p></header>
       {!game ? (
         <section className="setup-panel mt-6">
-          <h2 className="text-xl font-semibold">Choose your country</h2>
+          <h2 className="text-xl font-semibold">1. Choose your country</h2>
           <p className="mt-2">Pick your country, then start a game against nine opponents.</p>
           <p className="mt-2 text-sm">Choose from 32 countries. Population estimates for 2026 come from <a href="https://www.worldometers.info/world-population/population-by-country/" target="_blank" rel="noreferrer" className="underline">Worldometer</a>.</p>
           <div className="mt-6 flex flex-wrap gap-4">
@@ -144,7 +144,7 @@ export default function Home() {
           </div>
           <p className="mt-3 text-sm" role="status">Showing {visibleCountries.length} of {countries.length} countries.</p>
           {visibleCountries.length === 0 && <p className="mt-4">No countries match. Try another name or strength.</p>}
-          <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="country-picker mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {visibleCountries.map((country) => (
               <li key={country.id}>
                 <button type="button" onClick={() => setSelectedCountryId(country.id)}
@@ -212,11 +212,11 @@ export default function Home() {
 
           {isMyTurn && (
             <section className="move-panel mt-6 rounded border border-zinc-400 p-5" aria-label="Your move">
-              <h2 className="text-xl font-semibold">Your move</h2>
+              <h2 className="text-xl font-semibold">Your next move</h2><p className="move-help">{game.phase === "action" ? "Choose your country, then a target. Attack an opponent or transfer soldiers to a country you own." : game.phase === "combat" ? "Roll to continue fighting, or stop to keep your remaining soldiers." : game.phase === "conquest" ? "Keep at least one soldier behind when you occupy the captured country." : "Choose one of your countries and place your new soldiers."}</p>
               {game.phase === "reinforcement" && <p className="mt-2">Place your {game.reinforcementsRemaining} reinforcements before taking an action.</p>}
               {(game.phase === "reinforcement" || game.phase === "action") && (
                 <div className="mt-4 flex flex-wrap gap-3">
-                  <label>From your country
+                  <label>Your country
                     <select value={fromId} onChange={(event) => setFromId(event.target.value)} className="ml-2 rounded border border-zinc-400 bg-transparent p-2">
                       <option value="">Choose</option>
                       {mine.map((territory) => <option key={territory.country.id} value={territory.country.id}>{territory.country.name} ({territory.soldiers})</option>)}
@@ -275,7 +275,7 @@ export default function Home() {
 
           </div>
           <section className="mt-8" aria-label="Game events">
-            <h2 className="text-xl font-semibold">What happened</h2>
+            <h2 className="text-xl font-semibold">Latest moves</h2>
             <ol className="event-list mt-3 space-y-2" aria-live="polite">
               {[...game.events].reverse().slice(0, 20).map((event) => (
                 <li key={event.sequence} className="rounded border border-zinc-300 p-3 dark:border-zinc-700">
@@ -287,7 +287,7 @@ export default function Home() {
           </section>
         </>
       )}
-      {error && <p role="alert" className="mt-5 rounded border border-red-600 p-3 text-red-700 dark:text-red-300">{error}</p>}
+      {error && <p role="alert" className="mt-5 rounded border border-red-600 p-3 text-red-700 ">{error}</p>}
     </main>
   );
 }
