@@ -2,13 +2,13 @@
 
 import { useRef } from "react";
 
-export function GameTutorial({ onOpen }: { onOpen: () => void }) {
+export function GameTutorial({ onOpen }: { onOpen?: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null);
 
   return <>
     <button type="button" className="tutorial-button" onClick={() => {
       // pause the opponents while i read the instructions
-      onOpen();
+      onOpen?.();
       dialog.current?.showModal();
     }}>How to play</button>
     <dialog ref={dialog} className="tutorial-dialog" aria-labelledby="tutorial-title">
@@ -50,7 +50,7 @@ export function GameTutorial({ onOpen }: { onOpen: () => void }) {
         <p>The numbered square markers show soldiers. Blue markers belong to you; other marker colours identify NPC owners. Yellow borders indicate your selected source or target. The background artwork keeps its original colours, so use markers and the country list to check ownership.</p>
         <p>Attack routes and capture flashes show conflict locations. Latest moves records dice, losses, captures and NPC explanations. Opponents look for favourable attacks, reinforce strong armies, combine troops when useful, and may stop or skip an unfavourable fight.</p>
       </details>
-      <p className="tutorial-note">Games currently run in this browser page. Refreshing or closing the page resets the game; saving and accounts are not available yet.</p>
+      <p className="tutorial-note">Log in or register before starting. Every accepted move is saved to your account. After refreshing or returning later, choose Resume game from My saved games. Back to my games lets you start another game without losing the current one. If another tab changes the game, use Reload saved game before continuing.</p>
     </dialog>
   </>;
 }

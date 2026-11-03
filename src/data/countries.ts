@@ -1,5 +1,5 @@
-import type { Country } from "@/types/game";
-import { soldiersForPopulation } from "@/lib/game/rules";
+import type { Country } from "../types/game.ts";
+import { soldiersForPopulation } from "../lib/game/rules.ts";
 
 // Selected 2026 country population estimates. Keep these values stable for saved games.
 const populationYear = 2026;

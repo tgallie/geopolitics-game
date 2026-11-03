@@ -12,7 +12,7 @@ Keep `MONGODB_URI`, `MONGODB_DB`, `BETTER_AUTH_SECRET` and `BETTER_AUTH_URL` in 
 
 ## Current scope
 
-Accounts persist, but game progress still lives in the browser. Guest play remains available. Accounts are not yet attached to games, and this stage does not claim to enforce ownership of game actions. The next stage moves games and move validation to the server and saves them against the authenticated player.
+Accounts and game progress persist in MongoDB. Players must log in to start, list, resume or play their own games. Every game endpoint validates the session and ownership on the server. Public spectator links are not implemented yet.
 
 Email verification and password-reset emails are not configured yet. Add an email provider and those flows before a public launch. During hosting setup, configure the trusted proxy/IP headers for rate limiting and check HTTPS cookies with the final domain.
 

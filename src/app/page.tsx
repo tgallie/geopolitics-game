@@ -1,95 +1,53 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { GameTutorial } from "@/components/game-tutorial";
 import { WorldGameMap } from "@/components/world-game-map";
 import { countries } from "@/data/countries";
-import { advanceNpc } from "@/lib/ai/npc-strategy";
-import { GameEngine } from "@/lib/game/game-engine";
-import type { GameAction, GameState } from "@/types/game";
-
-function randomFraction() {
-  const value = new Uint32Array(1);
-  crypto.getRandomValues(value);
-  return value[0] / 2 ** 32;
-}
+import { authClient } from "@/lib/auth-client";
+import { useSavedGame } from "@/lib/game/use-saved-game";
 
 export default function Home() {
-  // keep the game in one place so every button uses the same rules
-  const engine = useRef<GameEngine | null>(null);
-  const [game, setGame] = useState<GameState | null>(null);
+  const { data: session, isPending } = authClient.useSession();
+  if (!session) return (
+    <main className="game-interface mx-auto w-full max-w-7xl p-4 text-slate-900 sm:p-8">
+      <header className="game-header">
+        <h1 className="text-3xl font-bold">World Conquerer</h1>
+        <p>{isPending ? "Checking your account…" : "Log in or register above to start and save your games."}</p>
+        <GameTutorial />
+      </header>
+    </main>
+  );
+  // changing accounts clears the old board before i load another player's games
+  return <SavedGameScreen key={session.user.id} />;
+}
+
+function SavedGameScreen() {
+  const { game, savedGames, listLoading, busy, error, autoPlay, setAutoPlay, playbackDelay, setPlaybackDelay,
+    start, resume, play, playNpc, leave, refreshList } = useSavedGame();
   const [selectedCountryId, setSelectedCountryId] = useState<string | null>(null);
   const [countrySearch, setCountrySearch] = useState("");
   const [soldierFilter, setSoldierFilter] = useState("all");
   const [fromId, setFromId] = useState("");
   const [toId, setToId] = useState("");
   const [amount, setAmount] = useState(1);
-  const [error, setError] = useState("");
-  const [autoPlay, setAutoPlay] = useState(false);
-  const [playbackDelay, setPlaybackDelay] = useState(700);
 
-  // play one NPC decision at a time so i can still see what each one did
-  useEffect(() => {
-    if (!autoPlay || !game || game.phase === "finished") return;
-    const player = game.players.find((item) => item.id === game.currentPlayerId);
-    if (player?.kind !== "npc") return;
-
-    const timer = window.setTimeout(() => {
-      try {
-        if (!engine.current) return;
-        const next = advanceNpc(engine.current);
-        setGame(next);
-        setError("");
-        if (next.phase === "finished" || next.players.find((item) => item.id === next.currentPlayerId)?.kind === "human") {
-          setAutoPlay(false);
-        }
-      } catch (cause) {
-        setAutoPlay(false);
-        setError(cause instanceof Error ? cause.message : "The opponent could not move.");
-      }
-    }, playbackDelay);
-
-    return () => window.clearTimeout(timer);
-  }, [autoPlay, game, playbackDelay]);
-
-  function startGame() {
+  async function startGame() {
     if (!selectedCountryId) return;
-    try {
-      const next = GameEngine.create({
-        id: crypto.randomUUID(),
-        ownerUserId: "local-player",
-        selectedCountryId,
-        countries,
-      }, randomFraction);
-      engine.current = next;
-      setGame(next.snapshot);
+    if (await start(selectedCountryId)) {
       setFromId(selectedCountryId);
       setToId("");
       setAmount(1);
-      setError("");
-      setAutoPlay(false);
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Could not start the game.");
     }
   }
 
-  function play(action: GameAction) {
-    if (!engine.current || !game) return;
-    try {
-      setGame(engine.current.dispatch(game.currentPlayerId, game.revision, action));
-      setError("");
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "That move could not be made.");
-    }
-  }
-
-  function playNpc() {
-    if (!engine.current || !game) return;
-    try {
-      setGame(advanceNpc(engine.current));
-      setError("");
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "The opponent could not move.");
+  async function resumeGame(id: string) {
+    const next = await resume(id);
+    if (next) {
+      const human = next.players.find((player) => player.kind === "human");
+      setFromId(next.territories.find((territory) => territory.ownerId === human?.id)?.country.id ?? "");
+      setToId("");
+      setAmount(1);
     }
   }
 
@@ -128,6 +86,25 @@ export default function Home() {
         <p>Choose your country. Build your army. Conquer all 10 countries to win.</p>
         <GameTutorial onOpen={() => setAutoPlay(false)} />
       </header>
+      <section className="setup-panel mt-6" aria-label="Saved games">
+        <h2 className="text-xl font-semibold">{game ? "Your saved game" : "My saved games"}</h2>
+        <p role="status" className="mt-2">{busy ? "Please wait — confirming with the server…" : game ? "All displayed moves are saved. You can leave and resume later." : "Your 100 most recently played games appear here."}</p>
+        {game ? <div className="mt-3 flex flex-wrap gap-3">
+          <button type="button" disabled={busy} onClick={leave} className="rounded border px-4 py-2">Back to my games / New game</button>
+          <button type="button" disabled={busy} onClick={() => resumeGame(game.id)} className="rounded border px-4 py-2">Reload saved game</button>
+        </div> : <>
+          <button type="button" disabled={busy || listLoading} onClick={refreshList} className="mt-3 rounded border px-4 py-2">Refresh saved games</button>
+          {listLoading ? <p role="status">Loading saved games…</p> : savedGames.length === 0 ? <p className="mt-3">No saved games yet. Choose a country below to start.</p> :
+            <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+              {savedGames.map((saved) => <li key={saved.id} className="rounded border p-3">
+                <p><strong>{saved.countryName}</strong> · Round {saved.round} · {saved.phase === "finished" ? "Finished" : "In progress"}</p>
+                <p className="mt-2">Last played: {new Date(saved.updatedAt).toLocaleString()}</p>
+                <button type="button" disabled={busy} onClick={() => resumeGame(saved.id)} className="mt-3 rounded border px-4 py-2">{saved.phase === "finished" ? "View result" : "Resume game"}</button>
+              </li>)}
+            </ul>}
+        </>}
+      </section>
+      <fieldset disabled={busy} className="min-w-0 border-0 p-0">
       {!game ? (
         <section className="setup-panel mt-6">
           <h2 className="text-xl font-semibold">1. Choose your country</h2>
@@ -293,6 +270,7 @@ export default function Home() {
           </section>
         </>
       )}
+      </fieldset>
       {error && <p role="alert" className="mt-5 rounded border border-red-600 p-3 text-red-700 ">{error}</p>}
     </main>
   );

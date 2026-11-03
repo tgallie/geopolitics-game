@@ -78,7 +78,7 @@ export function AccountPanel() {
       {open && !session && (
         <section id="account-form" className={styles.formArea}>
           <h2>{register ? "Create your player account" : "Welcome back"}</h2>
-          <p>Accounts are saved. Saving game progress is coming in the next stage.</p>
+          <p>Log in to start a game or resume your saved progress.</p>
           <form onSubmit={submit} key={register ? "register" : "login"}>
             <fieldset disabled={busy}>
               {register && <label>Player name<input name="name" autoComplete="nickname" required maxLength={40} /></label>}

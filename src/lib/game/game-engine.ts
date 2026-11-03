@@ -63,6 +63,11 @@ export class GameEngine {
     return structuredClone(this.state);
   }
 
+  // only restore snapshots loaded from our database, never a browser request
+  static restore(state: GameState, random: RandomSource): GameEngine {
+    return new GameEngine(structuredClone(state), random);
+  }
+
   dispatch(playerId: string, expectedRevision: number, action: GameAction): GameState {
     requireCondition(this.state.phase !== "finished", "This game has finished.");
     requireCondition(playerId === this.state.currentPlayerId, "It is not this player's turn.");
