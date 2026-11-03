@@ -94,3 +94,40 @@ body { background: #eaf3f7; }
 .tutorial-dialog th, .tutorial-dialog td { border: 1px solid #cbd5e1; padding: 8px; text-align: left; }
 .tutorial-dialog th { background: #eaf3f7; }
 .tutorial-note { background: #fff5d6; padding: 12px; border-left: 4px solid #b77908; }
+
+/* Retro palette: cyan ocean, pink, yellow, teal and purple map regions. */
+:root { color-scheme: light; --font-geist-sans: var(--font-pixel); --font-geist-mono: var(--font-pixel); }
+body { font-family: var(--font-pixel), monospace; font-size: 12px; line-height: 2; background-color: #b9e6f7; background-image: linear-gradient(45deg,#9bd8ee 25%,transparent 25%,transparent 75%,#9bd8ee 75%),linear-gradient(45deg,#9bd8ee 25%,transparent 25%,transparent 75%,#9bd8ee 75%); background-size: 32px 32px; background-position: 0 0,16px 16px; color: #172033; }
+.game-interface h1 { font-size: clamp(20px,3vw,30px); line-height: 1.7; }
+.game-interface h2 { font-size: 18px; line-height: 1.8; }
+.game-interface h3 { font-size: 13px; line-height: 1.9; }
+.game-header { border: 4px solid #172033; border-bottom: 8px solid #f472b6; border-radius: 0; background: #24335b; box-shadow: 6px 6px 0 #172033; }
+.game-header p:last-child { color: #fff; font-size: 11px; }
+.game-eyebrow { color: #fff28a; font-size: 10px; letter-spacing: .08em; }
+.game-interface section[aria-label="Turn status"], .setup-panel, .move-panel, .game-interface section[aria-label="Game events"] { border: 3px solid #172033; border-radius: 0; box-shadow: 5px 5px 0 #172033; color: #172033; }
+.setup-panel { background: #fffdf0; }
+.game-interface section[aria-label="Turn status"] { background: #c9f2df; border-top: 8px solid #168675; }
+.move-panel { background: #fff7ce; border-top: 8px solid #d99100; }
+.game-interface section[aria-label="Game events"] { background: #f2eaff; border-top: 8px solid #7c3aed; }
+.game-interface button, .game-interface input, .game-interface select { font: inherit; font-size: 11px; line-height: 1.8; min-height: 46px; border-radius: 0; border-width: 2px; }
+.game-interface button { box-shadow: 3px 3px 0 #172033; padding: 10px 14px; }
+.game-interface button:not(:disabled):hover { filter: brightness(.95); }
+.game-interface button:not(:disabled):active { transform: translate(2px,2px); box-shadow: 1px 1px 0 #172033; }
+.game-interface button:disabled { opacity: 1; color: #475569; background: #e2e8f0; border-color: #64748b; box-shadow: none; }
+.game-interface input, .game-interface select, .game-interface option { background: #fff; color: #172033; }
+.game-interface input::placeholder { color: #58677c; opacity: 1; }
+.country-picker button { background: #e0f5f4; border-color: #172033; color: #172033; border-radius: 0; }
+.country-picker button:hover { background: #bce9e6; }
+.country-picker button[aria-pressed="true"] { background: #243f99; color: #fff; border-color: #172033; }
+.country-picker button[aria-pressed="true"]:hover { background: #243f99; }
+.game-interface section[aria-label="Game board"] > ul > li { border: 2px solid #172033; border-left: 7px solid #8b5bb5; border-radius: 0; }
+.game-interface .text-sm, .move-help { font-size: 11px; line-height: 2; }
+.game-interface .text-xs { font-size: 10px; line-height: 2; }
+.game-interface [role="alert"] { color: #8f1532; background: #fff0f4; border: 3px solid #a51d43; }
+.tutorial-dialog { font-family: var(--font-pixel), monospace; font-size: 12px; line-height: 2.1; border: 4px solid #172033; border-radius: 0; background: #fffdf0; }
+.tutorial-heading h2 { font-size: 20px; }
+.tutorial-dialog h3 { font-size: 15px; }
+.tutorial-dialog details { border-radius: 0; border: 2px solid #596789; }
+.tutorial-dialog summary { color: #243f99; }
+.tutorial-button { color: #172033; background: #fff28a; border-color: #172033; }
+@media (max-width: 600px) { .game-header, .setup-panel, .move-panel { padding: 16px; } .tutorial-heading { flex-wrap: wrap; } }
