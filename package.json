@@ -8,12 +8,16 @@
     "start": "next start",
     "lint": "eslint",
     "map:data": "node scripts/build-map-data.mjs",
-    "test": "node --experimental-strip-types --test tests/*.test.mjs"
+    "test": "node --experimental-strip-types --test tests/*.test.mjs",
+    "db:check": "node --conditions=react-server --experimental-strip-types scripts/check-database.mjs"
   },
   "dependencies": {
+    "@next/env": "16.4.2",
+    "mongodb": "^7.8.0",
     "next": "16.4.2",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
