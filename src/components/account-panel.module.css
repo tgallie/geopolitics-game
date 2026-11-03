@@ -1,0 +1,15 @@
+.panel { margin: 16px auto 0; width: calc(100% - 32px); max-width: 1216px; padding: 16px; background: #fff9dd; color: #172033; border: 3px solid #24335b; box-shadow: 5px 5px 0 #24335b; font-size: 11px; line-height: 1.9; }
+.bar, .actions { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+.actions span { overflow-wrap: anywhere; }
+.panel a { color: #173b8f; }
+.panel button { padding: 10px 14px; border: 2px solid #24335b; background: #24335b; color: #fff; cursor: pointer; }
+.panel button:hover { background: #394d80; }
+.panel button:disabled { background: #d1d5db; color: #263449; cursor: wait; }
+.panel :is(button, input, a):focus-visible { outline: 3px solid #a13375; outline-offset: 3px; }
+.formArea { max-width: 560px; margin: 20px auto 0; }
+.formArea h2 { font-size: 15px; margin-bottom: 12px; }
+.formArea p { margin-bottom: 16px; }
+.formArea fieldset { display: grid; gap: 16px; border: 0; min-width: 0; }
+.formArea label { display: grid; gap: 8px; }
+.formArea input { width: 100%; min-width: 0; padding: 12px; color: #172033; background: #fff; border: 2px solid #24335b; font: 16px/1.5 system-ui, sans-serif; }
+.error { padding: 12px; margin-top: 12px; color: #75182b; background: #ffe4e8; border: 2px solid #9e2541; }

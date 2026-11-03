@@ -5,7 +5,7 @@ const mongoGlobal = globalThis as typeof globalThis & {
   gameMongoClient?: Promise<MongoClient>;
 };
 
-export async function getDatabase() {
+export async function getMongoClient() {
   const uri = process.env.MONGODB_URI?.trim();
   const databaseName = process.env.MONGODB_DB?.trim();
 
@@ -27,6 +27,10 @@ export async function getDatabase() {
     });
   }
 
-  const client = await mongoGlobal.gameMongoClient;
-  return client.db(databaseName);
+  return mongoGlobal.gameMongoClient;
+}
+
+export async function getDatabase() {
+  const client = await getMongoClient();
+  return client.db(process.env.MONGODB_DB!.trim());
 }
