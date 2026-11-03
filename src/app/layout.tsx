@@ -5,7 +5,7 @@ import "./globals.css";
 const pixelFont = Press_Start_2P({ weight: "400", subsets: ["latin"], variable: "--font-pixel", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Geopolitics Game",
+  title: "World Conquerer",
   description: "A turn-based world conquest strategy game.",
 };
 

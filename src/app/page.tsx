@@ -124,7 +124,7 @@ export default function Home() {
     <main className="game-interface mx-auto w-full max-w-7xl p-4 text-slate-900 sm:p-8">
       <header className="game-header">
         <p className="game-eyebrow">WORLD CONQUEST</p>
-        <h1 className="text-3xl font-bold">Geopolitics game</h1>
+        <h1 className="text-3xl font-bold">World Conquerer</h1>
         <p>Choose your country. Build your army. Conquer all 10 countries to win.</p>
         <GameTutorial onOpen={() => setAutoPlay(false)} />
       </header>
