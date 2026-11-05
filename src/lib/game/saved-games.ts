@@ -1,24 +1,12 @@
 import "server-only";
 import { randomInt, randomUUID } from "node:crypto";
 import { getAuth } from "../auth.ts";
-import { getDatabase } from "../db/mongodb.ts";
+import { getGameRepository } from "../db/game-repository.ts";
 import { countries } from "../../data/countries.ts";
 import { GameEngine } from "./game-engine.ts";
 import { advanceNpc } from "../ai/npc-strategy.ts";
 import { addBattleCommentary } from "../ai/battle-commentary.ts";
 import type { GameAction, GameState } from "../../types/game.ts";
-
-interface SavedGame {
-  _id: string;
-  ownerUserId: string;
-  countryName: string;
-  createdAt: Date;
-  updatedAt: Date;
-  state: GameState;
-  shareToken?: string;
-}
-
-let shareIndex: Promise<string> | undefined;
 
 export async function handleShareRequest(request: Request, gameId: string) {
   try {
@@ -26,23 +14,18 @@ export async function handleShareRequest(request: Request, gameId: string) {
     if (request.method !== "GET") rejectUnless(request.headers.get("origin") === new URL(process.env.BETTER_AUTH_URL!).origin, 403, "Open the game from its configured website address.");
     const session = await (await getAuth()).api.getSession({ headers: request.headers });
     rejectUnless(session, 401, "Log in to manage spectator links.");
-    const games = (await getDatabase()).collection<SavedGame>("games");
-    shareIndex ??= games.createIndex({ shareToken: 1 }, { unique: true, partialFilterExpression: { shareToken: { $type: "string" } } })
-      .catch((error) => { shareIndex = undefined; throw error; });
-    await shareIndex;
-    const filter = { _id: gameId, ownerUserId: session.user.id };
-    const saved = await games.findOne(filter);
+    const games = await getGameRepository();
+    const saved = await games.findOwned(gameId, session.user.id);
     rejectUnless(saved, 404, "Saved game not found.");
     if (request.method === "DELETE") {
-      await games.updateOne(filter, { $unset: { shareToken: "" } });
+      await games.revokeSharing(gameId, session.user.id);
       return json({ token: null });
     }
     if (request.method === "POST") {
       // keep the same link until i explicitly stop sharing it
-      await games.updateOne({ ...filter, shareToken: { $exists: false } }, { $set: { shareToken: randomUUID() } });
+      return json({ token: await games.enableSharing(gameId, session.user.id) });
     }
-    const current = await games.findOne(filter);
-    return json({ token: current?.shareToken ?? null });
+    return json({ token: saved.shareToken ?? null });
   } catch (error) {
     return error instanceof RequestError ? json({ message: error.message }, error.status) : json({ message: "Could not update spectator sharing. Try again shortly." }, 503);
   }
@@ -52,7 +35,7 @@ export async function handleWatchRequest(request: Request, token: string) {
   try {
     rejectUnless(request.method === "GET", 405, "Spectators can only watch games.");
     rejectUnless(/^[a-f0-9-]{36}$/.test(token), 404, "This spectator link is unavailable.");
-    const saved = await (await getDatabase()).collection<SavedGame>("games").findOne({ shareToken: token });
+    const saved = await (await getGameRepository()).findShared(token);
     rejectUnless(saved, 404, "This spectator link is unavailable or sharing has stopped.");
     // never include account identifiers or credentials in the public view
     const { ownerUserId: _owner, ...state } = saved.state;
@@ -100,7 +83,6 @@ function parseAction(value: unknown): GameAction {
 }
 
 const randomFraction = () => randomInt(0, 2 ** 32) / 2 ** 32;
-let indexes: Promise<string> | undefined;
 
 function json(value: unknown, status = 200) {
   return Response.json(value, { status, headers: { "Cache-Control": "no-store" } });
@@ -117,16 +99,8 @@ export async function handleGameRequest(request: Request, gameId?: string) {
     const session = await auth.api.getSession({ headers: request.headers });
     rejectUnless(session, 401, "Log in to start or resume your saved games.");
     const ownerUserId = session.user.id;
-    const database = await getDatabase();
-    const games = database.collection<SavedGame>("games");
-    indexes ??= games.createIndex({ ownerUserId: 1, updatedAt: -1 }).catch((error) => { indexes = undefined; throw error; });
-    await indexes;
-
-    if (request.method === "GET" && !gameId) {
-      const rows = await games.find({ ownerUserId }, { projection: { countryName: 1, updatedAt: 1, "state.round": 1, "state.phase": 1 } })
-        .sort({ updatedAt: -1 }).limit(100).toArray();
-      return json(rows.map((row) => ({ id: row._id, countryName: row.countryName, updatedAt: row.updatedAt.toISOString(), round: row.state.round, phase: row.state.phase })));
-    }
+    const games = await getGameRepository();
+    if (request.method === "GET" && !gameId) return json(await games.listOwned(ownerUserId));
 
     let body: Record<string, unknown> = {};
     if (request.method === "POST") {
@@ -138,13 +112,12 @@ export async function handleGameRequest(request: Request, gameId?: string) {
     if (!gameId) {
       rejectUnless(typeof body.selectedCountryId === "string" && countries.some((country) => country.id === body.selectedCountryId), 400, "Choose a country from the available list.");
       const state = GameEngine.create({ id: randomUUID(), ownerUserId, selectedCountryId: body.selectedCountryId, countries }, randomFraction).snapshot;
-      const now = new Date();
-      await games.insertOne({ _id: state.id, ownerUserId, countryName: countries.find((country) => country.id === body.selectedCountryId)!.name, createdAt: now, updatedAt: now, state });
+      await games.create(state, countries.find((country) => country.id === body.selectedCountryId)!.name);
       return json(state, 201);
     }
 
     rejectUnless(gameId.length <= 80, 404, "Saved game not found.");
-    const saved = await games.findOne({ _id: gameId, ownerUserId });
+    const saved = await games.findOwned(gameId, ownerUserId);
     rejectUnless(saved, 404, "Saved game not found.");
     if (request.method === "GET") return json(saved.state);
     rejectUnless(Number.isSafeInteger(body.revision) && body.revision === saved.state.revision, 409, "This game changed in another tab. Reload it before continuing.");
@@ -160,11 +133,8 @@ export async function handleGameRequest(request: Request, gameId?: string) {
     }
     await addBattleCommentary(next, saved.state.events.length);
     // save only if no other tab has already changed this turn
-    const result = await games.updateOne(
-      { _id: gameId, ownerUserId, "state.revision": saved.state.revision },
-      { $set: { state: next, updatedAt: new Date() } },
-    );
-    rejectUnless(result.modifiedCount === 1, 409, "This game changed in another tab. Reload it before continuing.");
+    const savedMove = await games.saveMove(next, ownerUserId, saved.state.revision);
+    rejectUnless(savedMove, 409, "This game changed in another tab. Reload it before continuing.");
     return json(next);
   } catch (error) {
     if (error instanceof RequestError) return json({ message: error.message }, error.status);

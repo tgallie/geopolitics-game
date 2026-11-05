@@ -1,7 +1,7 @@
 import "server-only";
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
-import { getDatabase, getMongoClient } from "./db/mongodb.ts";
+import { prepareAuthStore } from "./db/auth-store.ts";
 
 async function createAuth() {
   const secret = process.env.BETTER_AUTH_SECRET;
@@ -9,15 +9,7 @@ async function createAuth() {
   if (!secret || secret.length < 32 || !baseURL) {
     throw new Error("Set BETTER_AUTH_SECRET and BETTER_AUTH_URL before using accounts.");
   }
-  const database = await getDatabase();
-  const client = await getMongoClient();
-  // stop duplicate accounts and remove old sessions after they expire
-  await Promise.all([
-    database.collection("user").createIndex({ email: 1 }, { unique: true }),
-    database.collection("session").createIndex({ token: 1 }, { unique: true }),
-    database.collection("session").createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
-    database.collection("account").createIndex({ providerId: 1, accountId: 1 }, { unique: true }),
-  ]);
+  const { database, client } = await prepareAuthStore();
   return betterAuth({
     appName: "World Conquerer",
     baseURL,
