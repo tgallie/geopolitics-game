@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { AccountPanel } from "@/components/account-panel";
 import { GameTutorial } from "@/components/game-tutorial";
 import { WorldGameMap } from "@/components/world-game-map";
 import { countries } from "@/data/countries";
@@ -9,18 +10,15 @@ import { useSavedGame } from "@/lib/game/use-saved-game";
 import { ShareGame } from "@/components/share-game";
 
 export default function Home() {
-  const { data: session, isPending } = authClient.useSession();
+  const { data: session } = authClient.useSession();
   if (!session) return (
-    <main className="game-interface mx-auto w-full max-w-7xl p-4 text-slate-900 sm:p-8">
-      <header className="game-header">
-        <h1 className="text-3xl font-bold">World Conquerer</h1>
-        <p>{isPending ? "Checking your account…" : "Log in or register above to start and save your games."}</p>
-        <GameTutorial />
-      </header>
+    <main className="flex flex-1 items-center justify-center p-4 sm:p-8">
+      <AccountPanel />
     </main>
   );
   // changing accounts clears the old board before i load another player's games
-  return <SavedGameScreen key={session.user.id} />;
+  return <><AccountPanel /><SavedGameScreen key={session.user.id} /></>;
+
 }
 
 function SavedGameScreen() {

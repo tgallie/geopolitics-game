@@ -1,6 +1,6 @@
 # Player accounts
 
-The account panel above the game supports email/password registration, login and logout. Registration signs the player in automatically. The panel stays on the game page so opening it does not navigate away from an ongoing game.
+The welcome menu appears before the game for signed-out players, with Sign in and Sign up choices. Registration signs the player in automatically; successful sign-in opens the game and saved-game list. Existing valid sessions enter directly. The in-game account bar shows the player name and Log out, which returns to the welcome menu. Public spectator pages remain accessible without signing in and link back to this menu.
 
 Better Auth handles password hashing, HTTP-only same-site session cookies, origin checks and session validation. MongoDB stores users, credential accounts, sessions and rate limits. Sessions expire after seven days and renew after one day of activity; logout revokes the current session. Cookies use Secure on HTTPS production sites. Account endpoints limit repeated sign-in and sign-up attempts.
 

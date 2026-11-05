@@ -37,7 +37,7 @@ export function SpectatorGame({ token }: { token: string }) {
     <header className="game-header"><h1>World Conquerer — Spectator view</h1><p>Watch the battle unfold.</p></header>
     <section className="setup-panel mt-6">
       <p role="status">{message}</p>
-      <p className="mt-3"><Link href="/">Play your own game</Link> — register or log in using the account panel above.</p>
+      <p className="mt-3"><Link href="/">Play your own game</Link> — open the sign-in menu to register or resume your own games.</p>
     </section>
     {game && <>
       <section className="mt-6" aria-label="Turn status">

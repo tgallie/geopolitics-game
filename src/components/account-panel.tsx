@@ -7,7 +7,6 @@ import styles from "./account-panel.module.css";
 
 export function AccountPanel() {
   const { data: session, isPending, error: sessionError, refetch } = authClient.useSession();
-  const [open, setOpen] = useState(false);
   const [register, setRegister] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -40,7 +39,6 @@ export function AccountPanel() {
       }
       // clear the password fields once i'm signed in
       form.reset();
-      setOpen(false);
       await refetch();
     } catch {
       setError("Could not reach accounts. Please try again shortly.");
@@ -59,26 +57,27 @@ export function AccountPanel() {
   }
 
   return (
-    <aside className={styles.panel} aria-label="Player account">
+    <aside className={`${styles.panel} ${!session ? styles.welcome : ""}`} aria-label="Player account">
       <div className={styles.bar}>
-        <Link href="/">World Conquerer</Link>
+        {session ? <Link href="/">World Conquerer</Link> : <div className={styles.heading}><h1>World Conquerer</h1><p>Choose your country. Build your army. Conquer the world.</p></div>}
         {isPending ? <span role="status">Checking account…</span> : session ? (
           <div className={styles.actions}>
             <span>Player: {session.user.name}</span>
             <button type="button" onClick={logout} disabled={busy}>{busy ? "Please wait…" : "Log out"}</button>
           </div>
-        ) : (
-          <button type="button" aria-expanded={open} aria-controls="account-form" onClick={() => { setOpen(!open); setError(""); }}>
-            {open ? "Close accounts" : "Log in / Register"}
-          </button>
-        )}
+        ) : null}
+
       </div>
       {sessionError && <p role="status">Accounts are unavailable right now. <button type="button" onClick={() => refetch()}>Retry</button></p>}
       {error && <p className={styles.error} role="alert">{error}</p>}
-      {open && !session && (
+      {!isPending && !session && (
         <section id="account-form" className={styles.formArea}>
+          <div className={styles.choices} aria-label="Account options">
+            <button type="button" disabled={busy} aria-pressed={!register} onClick={() => { setRegister(false); setError(""); }}>Sign in</button>
+            <button type="button" disabled={busy} aria-pressed={register} onClick={() => { setRegister(true); setError(""); }}>Sign up</button>
+          </div>
           <h2>{register ? "Create your player account" : "Welcome back"}</h2>
-          <p>Log in to start a game or resume your saved progress.</p>
+          <p>Sign in to resume your games, or sign up to start your first conquest.</p>
           <form onSubmit={submit} key={register ? "register" : "login"}>
             <fieldset disabled={busy}>
               {register && <label>Player name<input name="name" autoComplete="nickname" required maxLength={40} /></label>}
@@ -88,10 +87,7 @@ export function AccountPanel() {
                 <p id="password-help">Use 12–128 characters. A long passphrase works well.</p>
                 <label>Confirm password<input name="confirmation" type="password" autoComplete="new-password" required maxLength={128} /></label>
               </>}
-              <button type="submit">{busy ? "Please wait…" : register ? "Create account" : "Log in"}</button>
-              <button type="button" onClick={() => { setRegister(!register); setError(""); }}>
-                {register ? "Already registered? Log in" : "New player? Create an account"}
-              </button>
+              <button type="submit">{busy ? "Please wait…" : register ? "Create account & play" : "Sign in & play"}</button>
             </fieldset>
           </form>
         </section>

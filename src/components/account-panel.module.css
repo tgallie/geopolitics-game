@@ -13,3 +13,12 @@
 .formArea label { display: grid; gap: 8px; }
 .formArea input { width: 100%; min-width: 0; padding: 12px; color: #172033; background: #fff; border: 2px solid #24335b; font: 16px/1.5 system-ui, sans-serif; }
 .error { padding: 12px; margin-top: 12px; color: #75182b; background: #ffe4e8; border: 2px solid #9e2541; }
+.welcome { width: 100%; max-width: 620px; margin: 24px auto; padding: clamp(20px, 4vw, 40px); border-top: 10px solid #168675; box-shadow: 8px 8px 0 #24335b; }
+.heading { width: 100%; text-align: center; }
+.heading h1 { font-size: clamp(18px, 3vw, 26px); line-height: 1.8; color: #24335b; margin-bottom: 16px; }
+.heading p { color: #263449; line-height: 2.2; }
+.choices { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+.choices button { background: #fff; color: #24335b; box-shadow: 3px 3px 0 #24335b; }
+.choices button[aria-pressed="true"] { background: #24335b; color: #fff; border-bottom: 5px solid #f5c94c; }
+.choices button:hover { background: #d9f2ee; color: #172033; }
+.choices button:disabled { cursor: wait; }
