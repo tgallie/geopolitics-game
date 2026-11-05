@@ -3,7 +3,6 @@
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
-import styles from "./account-panel.module.css";
 
 export function AccountPanel() {
   const { data: session, isPending, error: sessionError, refetch } = authClient.useSession();
@@ -57,11 +56,11 @@ export function AccountPanel() {
   }
 
   return (
-    <aside className={`${styles.panel} ${!session ? styles.welcome : ""}`} aria-label="Player account">
-      <div className={styles.bar}>
-        {session ? <Link href="/">World Conquerer</Link> : <div className={styles.heading}><h1>World Conquerer</h1><p>Choose your country. Build your army. Conquer the world.</p></div>}
+    <aside className={`account-panel ${!session ? "account-welcome" : ""}`} aria-label="Player account">
+      <div className="account-bar">
+        {session ? <Link href="/">World Conquerer</Link> : <div className="account-heading"><h1>World Conquerer</h1><p>Choose your country. Build your army. Conquer the world.</p></div>}
         {isPending ? <span role="status">Checking account…</span> : session ? (
-          <div className={styles.actions}>
+          <div className="account-actions">
             <span>Player: {session.user.name}</span>
             <button type="button" onClick={logout} disabled={busy}>{busy ? "Please wait…" : "Log out"}</button>
           </div>
@@ -69,10 +68,10 @@ export function AccountPanel() {
 
       </div>
       {sessionError && <p role="status">Accounts are unavailable right now. <button type="button" onClick={() => refetch()}>Retry</button></p>}
-      {error && <p className={styles.error} role="alert">{error}</p>}
+      {error && <p className="account-error" role="alert">{error}</p>}
       {!isPending && !session && (
-        <section id="account-form" className={styles.formArea}>
-          <div className={styles.choices} aria-label="Account options">
+        <section id="account-form" className="account-formArea">
+          <div className="account-choices" aria-label="Account options">
             <button type="button" disabled={busy} aria-pressed={!register} onClick={() => { setRegister(false); setError(""); }}>Sign in</button>
             <button type="button" disabled={busy} aria-pressed={register} onClick={() => { setRegister(true); setError(""); }}>Sign up</button>
           </div>
