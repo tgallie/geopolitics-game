@@ -137,3 +137,74 @@ body { font-family: var(--font-pixel), monospace; font-size: 12px; line-height: 
 .game-interface .text-slate-600 { color: #263449; }
 .game-interface a { color: #173b8f; text-decoration-thickness: 2px; }
 .tutorial-dialog summary { color: #173b8f; }
+
+/* raised pixel buttons help me see what i can press */
+body :is(.game-interface, [aria-label="Player account"]) button {
+  --button-face: #aacbdc;
+  --button-ink: #18364b;
+  --button-edge: #304e65;
+  border: 3px solid var(--button-edge);
+  border-radius: 0;
+  background: var(--button-face);
+  color: var(--button-ink);
+  min-height: 52px;
+  padding: 13px 18px;
+  line-height: 1.9;
+  text-shadow: 1px 1px 0 #ffffff55;
+  box-shadow: inset 4px 4px 0 #ffffff70, inset -4px -5px 0 #102d4940, 0 5px 0 var(--button-edge), 0 8px 0 #17203325;
+  cursor: pointer;
+  transition: none;
+}
+body :is(.game-interface, [aria-label="Player account"]) button:not(:disabled):hover {
+  filter: brightness(1.07);
+  background: var(--button-face);
+  color: var(--button-ink);
+}
+body :is(.game-interface, [aria-label="Player account"]) button:not(:disabled):active {
+  transform: translateY(4px);
+  box-shadow: inset 3px 3px 0 #102d4940, inset -3px -3px 0 #ffffff50, 0 1px 0 var(--button-edge);
+}
+body :is(.game-interface, [aria-label="Player account"]) button:focus-visible {
+  outline: 3px solid #ad2365;
+  outline-offset: 5px;
+}
+body :is(.game-interface, [aria-label="Player account"]) button:disabled {
+  --button-face: #d9e0e4;
+  --button-ink: #4a5663;
+  --button-edge: #778794;
+  box-shadow: inset 2px 2px 0 #ffffff80, inset -2px -2px 0 #8895a330;
+  text-shadow: none;
+  transform: none;
+  filter: none;
+  cursor: not-allowed;
+}
+body .game-interface :is(.bg-blue-600, .start-game),
+body [aria-label="Player account"] button[type="submit"] {
+  --button-face: #28579a;
+  --button-ink: #fff;
+  --button-edge: #173454;
+  text-shadow: 1px 2px 0 #142d50;
+}
+body .game-interface button.bg-red-700 { --button-face: #a33351; --button-ink: #fff; --button-edge: #571d35; text-shadow: 1px 2px 0 #571d35; }
+body .game-interface button.tutorial-button { --button-face: #f3d478; --button-ink: #392b13; --button-edge: #68522b; text-shadow: none; }
+body .game-interface .country-picker button { --button-face: #bee4d6; --button-edge: #315c54; --button-ink: #183a34; }
+body :is(.game-interface, [aria-label="Player account"]) button[aria-pressed="true"] {
+  --button-face: #28579a;
+  --button-ink: #fff;
+  --button-edge: #173454;
+  border-color: #173454;
+  text-shadow: 1px 2px 0 #142d50;
+  box-shadow: inset 0 0 0 3px #f6da83, inset 6px 6px 0 #ffffff40, inset -6px -6px 0 #102d4940, 0 5px 0 #173454;
+}
+.game-interface :is(.setup-panel, .move-panel, section[aria-label="Turn status"], section[aria-label="Game events"]) {
+  border-width: 4px;
+  box-shadow: inset 3px 3px 0 #ffffffb0, inset -3px -3px 0 #24335b20, 6px 6px 0 #24335b;
+}
+.game-interface :is(input, select), [aria-label="Player account"] input {
+  border: 3px solid #466078;
+  box-shadow: inset 3px 3px 0 #24335b18;
+}
+.country-picker { gap: 18px; }
+@media (prefers-reduced-motion: reduce) {
+  body :is(.game-interface, [aria-label="Player account"]) button:not(:disabled):active { transform: none; }
+}
