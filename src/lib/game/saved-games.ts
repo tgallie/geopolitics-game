@@ -14,6 +14,54 @@ interface SavedGame {
   createdAt: Date;
   updatedAt: Date;
   state: GameState;
+  shareToken?: string;
+}
+
+let shareIndex: Promise<string> | undefined;
+
+export async function handleShareRequest(request: Request, gameId: string) {
+  try {
+    rejectUnless(["GET", "POST", "DELETE"].includes(request.method), 405, "Method not allowed.");
+    if (request.method !== "GET") rejectUnless(request.headers.get("origin") === new URL(process.env.BETTER_AUTH_URL!).origin, 403, "Open the game from its configured website address.");
+    const session = await (await getAuth()).api.getSession({ headers: request.headers });
+    rejectUnless(session, 401, "Log in to manage spectator links.");
+    const games = (await getDatabase()).collection<SavedGame>("games");
+    shareIndex ??= games.createIndex({ shareToken: 1 }, { unique: true, partialFilterExpression: { shareToken: { $type: "string" } } })
+      .catch((error) => { shareIndex = undefined; throw error; });
+    await shareIndex;
+    const filter = { _id: gameId, ownerUserId: session.user.id };
+    const saved = await games.findOne(filter);
+    rejectUnless(saved, 404, "Saved game not found.");
+    if (request.method === "DELETE") {
+      await games.updateOne(filter, { $unset: { shareToken: "" } });
+      return json({ token: null });
+    }
+    if (request.method === "POST") {
+      // keep the same link until i explicitly stop sharing it
+      await games.updateOne({ ...filter, shareToken: { $exists: false } }, { $set: { shareToken: randomUUID() } });
+    }
+    const current = await games.findOne(filter);
+    return json({ token: current?.shareToken ?? null });
+  } catch (error) {
+    return error instanceof RequestError ? json({ message: error.message }, error.status) : json({ message: "Could not update spectator sharing. Try again shortly." }, 503);
+  }
+}
+
+export async function handleWatchRequest(request: Request, token: string) {
+  try {
+    rejectUnless(request.method === "GET", 405, "Spectators can only watch games.");
+    rejectUnless(/^[a-f0-9-]{36}$/.test(token), 404, "This spectator link is unavailable.");
+    const saved = await (await getDatabase()).collection<SavedGame>("games").findOne({ shareToken: token });
+    rejectUnless(saved, 404, "This spectator link is unavailable or sharing has stopped.");
+    // never include account identifiers or credentials in the public view
+    const { ownerUserId: _owner, ...state } = saved.state;
+    void _owner;
+    state.players = state.players.map((player) => player.kind === "human" ? { ...player, name: "Player" } : player);
+    state.events = state.events.map((event) => ({ ...event, message: event.message.replace(/\bYou\b/g, "Player") }));
+    return json(state);
+  } catch (error) {
+    return error instanceof RequestError ? json({ message: error.message }, error.status) : json({ message: "Could not refresh this game. Trying again shortly." }, 503);
+  }
 }
 
 class RequestError extends Error {

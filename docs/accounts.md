@@ -12,7 +12,7 @@ Keep `MONGODB_URI`, `MONGODB_DB`, `BETTER_AUTH_SECRET` and `BETTER_AUTH_URL` in 
 
 ## Current scope
 
-Accounts and game progress persist in MongoDB. Players must log in to start, list, resume or play their own games. Every game endpoint validates the session and ownership on the server. Public spectator links are not implemented yet.
+Accounts and game progress persist in MongoDB. Players must log in to start, list, resume or play their own games. Private game endpoints validate the session and ownership on the server. Owners can enable a separate read-only spectator link that visitors can open without logging in.
 
 Email verification and password-reset emails are not configured yet. Add an email provider and those flows before a public launch. During hosting setup, configure the trusted proxy/IP headers for rate limiting and check HTTPS cookies with the final domain.
 

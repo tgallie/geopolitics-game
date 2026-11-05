@@ -5,7 +5,7 @@ import nextEnv from "@next/env";
 nextEnv.loadEnvConfig(process.cwd(), true);
 const { getAuth } = await import("../src/lib/auth.ts");
 const { getDatabase, getMongoClient } = await import("../src/lib/db/mongodb.ts");
-const { handleGameRequest } = await import("../src/lib/game/saved-games.ts");
+const { handleGameRequest, handleShareRequest, handleWatchRequest } = await import("../src/lib/game/saved-games.ts");
 const base = process.env.BETTER_AUTH_URL;
 const emails = [0, 1].map(() => `saved-game-check-${randomUUID()}@example.invalid`);
 let database;
@@ -64,6 +64,34 @@ try {
   assert.deepEqual(await (await request(cookies[0], game.id)).json(), state, "Rejected actions must not change saved state");
   assert.equal((await request(cookies[0], undefined, { selectedCountryId: "GB" })).status, 201, "Second game must succeed");
   assert.equal((await (await request(cookies[0])).json()).length, 2, "Both games must remain available");
+  const share = (cookie, method = "POST", origin = base) => handleShareRequest(new Request(`${base}/api/games/${game.id}/share`, {
+    method, headers: { origin, ...(cookie ? { cookie } : {}) },
+  }), game.id);
+  const watch = (token, method = "GET") => handleWatchRequest(new Request(`${base}/api/watch/${token}`, { method }), token);
+  assert.equal((await share(null)).status, 401, "Anonymous sharing must fail");
+  assert.equal((await share(cookies[1])).status, 404, "Another player cannot share this game");
+  assert.equal((await share(cookies[0], "POST", "https://untrusted.example")).status, 403, "Cross-origin sharing must fail");
+  assert.equal((await (await share(cookies[0], "GET")).json()).token, null, "Sharing starts disabled");
+  const shared = await share(cookies[0]);
+  assert.equal(shared.status, 200, "Owner can enable sharing");
+  const { token } = await shared.json();
+  assert.ok(!!token, "Link must have a token");
+  assert.equal((await (await share(cookies[0])).json()).token, token, "Repeated sharing preserves the link");
+  const publicResponse = await watch(token);
+  assert.equal(publicResponse.status, 200, "Visitor can watch without login");
+  const publicState = await publicResponse.json();
+  assert.ok(!("ownerUserId" in publicState), "Public state must not expose account ID");
+  assert.equal(publicState.revision, state.revision, "Spectator sees latest moves");
+  assert.equal(publicState.territories.length, 10, "Spectator sees all countries");
+  assert.equal((await watch(token, "POST")).status, 405, "Spectator cannot make moves");
+  assert.equal((await watch(game.id)).status, 404, "Game ID is not a share token");
+  assert.equal((await share(cookies[1], "DELETE")).status, 404, "Another player cannot revoke sharing");
+  assert.equal((await share(cookies[0], "DELETE")).status, 200, "Owner can revoke sharing");
+  assert.equal((await watch(token)).status, 404, "Revoked link must stop working");
+  const newToken = (await (await share(cookies[0])).json()).token;
+  assert.notEqual(newToken, token, "Re-enabling sharing rotates the link");
+  assert.equal((await watch(token)).status, 404, "Old link stays revoked");
+  console.log("Spectator checks passed: public reads, private account data, owner-only sharing, read-only access and revocation.");
   console.log("Saved-game checks passed: persistence, multiple games, sessions, ownership, origin protection, invalid actions, NPC turns and concurrent updates.");
 } catch (error) {
   console.error(error?.code === "ERR_ASSERTION" ? `Saved-game check failed: ${error.message.split("\n")[0]}` : "Saved-game check failed. Check local configuration and database access.");

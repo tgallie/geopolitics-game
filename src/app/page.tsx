@@ -6,6 +6,7 @@ import { WorldGameMap } from "@/components/world-game-map";
 import { countries } from "@/data/countries";
 import { authClient } from "@/lib/auth-client";
 import { useSavedGame } from "@/lib/game/use-saved-game";
+import { ShareGame } from "@/components/share-game";
 
 export default function Home() {
   const { data: session, isPending } = authClient.useSession();
@@ -104,6 +105,7 @@ function SavedGameScreen() {
             </ul>}
         </>}
       </section>
+      {game && <section className="setup-panel mt-6"><ShareGame key={game.id} gameId={game.id} /></section>}
       <fieldset disabled={busy} className="min-w-0 border-0 p-0">
       {!game ? (
         <section className="setup-panel mt-6">

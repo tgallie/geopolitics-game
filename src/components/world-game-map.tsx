@@ -7,10 +7,10 @@ import type { GameState } from "@/types/game";
 const npcColors = ["#b45309", "#7c3aed", "#b91c1c", "#047857", "#a21caf", "#9a3412", "#0f766e", "#a16207", "#be185d"];
 
 interface WorldGameMapProps {
-  game: GameState;
+  game: Omit<GameState, "ownerUserId">;
   fromId: string;
   toId: string;
-  onSelect: (countryId: string) => void;
+  onSelect?: (countryId: string) => void;
 }
 
 export function WorldGameMap({ game, fromId, toId, onSelect }: WorldGameMapProps) {
@@ -24,11 +24,11 @@ export function WorldGameMap({ game, fromId, toId, onSelect }: WorldGameMapProps
   const fromRegion = map.regions.find((region) => territories.get(region.name)?.country.id === latestBattle?.fromCountryId);
   const toRegion = map.regions.find((region) => territories.get(region.name)?.country.id === latestBattle?.toCountryId);
 
-  function select(id: string) { onSelect(id); }
+  function select(id: string) { onSelect?.(id); }
 
   return (
     <div className="overflow-x-auto border-4 border-slate-800 bg-sky-200 shadow-[8px_8px_0_#0f172a]">
-      <svg viewBox={`0 0 ${map.width} ${map.height}`} className="block h-auto min-w-[720px] w-full" aria-label="Interactive world map showing countries in this game">
+      <svg viewBox={`0 0 ${map.width} ${map.height}`} className="block h-auto min-w-[720px] w-full" aria-label="World map showing countries in this game">
         <image href="/pixel-world-map-blocky.png" width="960" height="480" preserveAspectRatio="xMidYMid meet" />
         {animateBattle && fromRegion && toRegion && (
           <g key={latestBattle.sequence} className="pointer-events-none">
@@ -41,8 +41,8 @@ export function WorldGameMap({ game, fromId, toId, onSelect }: WorldGameMapProps
         {map.regions.filter((region) => territories.has(region.name)).map((region) => {
           const territory = territories.get(region.name)!;
           return (
-            <g key={`count-${region.name}`} className="cursor-pointer" role="button" tabIndex={0}
-              aria-label={`Select ${territory.country.name}`}
+            <g key={`count-${region.name}`} className={onSelect ? "cursor-pointer" : undefined} role={onSelect ? "button" : "img"} tabIndex={onSelect ? 0 : undefined}
+              aria-label={`${onSelect ? "Select " : ""}${territory.country.name}: ${territory.soldiers} soldiers`}
               onClick={() => select(territory.country.id)}
               onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); select(territory.country.id); } }}>
               <rect x={region.center[0] - 10} y={region.center[1] - 10} width="20" height="20"
@@ -54,10 +54,10 @@ export function WorldGameMap({ game, fromId, toId, onSelect }: WorldGameMapProps
         })}
       </svg>
       <div className="flex flex-wrap gap-x-5 gap-y-2 border-t-4 border-slate-800 bg-white px-4 py-3 text-sm text-slate-900">
-        <span className="flex items-center gap-2"><span className="inline-block h-4 w-4 bg-blue-700" />Your markers</span>
+        <span className="flex items-center gap-2"><span className="inline-block h-4 w-4 bg-blue-700" />{onSelect ? "Your markers" : "Player markers"}</span>
         <span className="flex items-center gap-2"><span className="inline-block h-4 w-4 bg-amber-700" />NPC markers (colour shows owner)</span>
       </div>
-      <p className="bg-white px-4 pb-3 text-xs text-slate-600">Select a square marker to choose a country. Marker colours show ownership; the artwork keeps its original colours.</p>
+      <p className="bg-white px-4 pb-3 text-xs text-slate-600">{onSelect ? "Select a square marker to choose a country. " : ""}Marker colours show ownership; the artwork keeps its original colours.</p>
     </div>
   );
 }
