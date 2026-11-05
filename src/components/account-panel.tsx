@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 
 export function AccountPanel() {
@@ -56,9 +55,9 @@ export function AccountPanel() {
   }
 
   return (
-    <aside className={`account-panel ${!session ? "account-welcome" : ""}`} aria-label="Player account">
+    <aside className={`account-panel ${!session ? "account-welcome" : "account-toolbar"}`} aria-label="Player account">
       <div className="account-bar">
-        {session ? <Link href="/">World Conquerer</Link> : <div className="account-heading"><h1>World Conquerer</h1><p>Choose your country. Build your army. Conquer the world.</p></div>}
+        {!session && <div className="account-heading"><h1>World Conquerer</h1><p>Choose your country. Build your army. Conquer the world.</p></div>}
         {isPending ? <span role="status">Checking account…</span> : session ? (
           <div className="account-actions">
             <span>Player: {session.user.name}</span>

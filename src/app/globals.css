@@ -290,6 +290,17 @@ body :is(.game-interface, [aria-label="Player account"]) button[aria-pressed="tr
 .account-formArea fieldset { gap: 16px; }
 .account-formArea label { gap: 8px; }
 .account-formArea input { padding: 10px 12px; }
+.account-toolbar {
+  width: 100%;
+  max-width: 1280px;
+  margin: 16px auto 0;
+  padding: 0 16px 8px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.account-toolbar .account-bar, .account-toolbar .account-actions { justify-content: flex-start; }
+@media (min-width: 640px) { .account-toolbar { padding-inline: 32px; } }
 @media (max-width: 440px) {
   .account-welcome { padding: 18px; }
   .account-choices { gap: 12px; }
