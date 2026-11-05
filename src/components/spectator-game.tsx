@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { WorldGameMap } from "./world-game-map";
+import { BattleCommentary } from "./battle-commentary";
 import type { GameState } from "@/types/game";
 
 export function SpectatorGame({ token }: { token: string }) {
@@ -53,6 +54,7 @@ export function SpectatorGame({ token }: { token: string }) {
       <section className="mt-6" aria-label="Game events"><h2>Latest moves</h2>
         <ol className="event-list mt-3 space-y-2">{[...game.events].reverse().slice(0, 20).map((event) => <li key={event.sequence} className="border p-3">Round {event.round}: {event.message}
           {event.dice && <p>{event.dice.map((pair) => `${pair.attack} vs ${pair.defend} (${pair.winner})`).join(" · ")}</p>}
+          <BattleCommentary event={event} />
         </li>)}</ol>
       </section>
     </>}

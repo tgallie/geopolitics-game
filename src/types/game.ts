@@ -60,6 +60,12 @@ export interface GameEvent {
   dice?: DicePair[];
   fromCountryId?: string;
   toCountryId?: string;
+  commentary?: {
+    text: string;
+    source: "ai" | "fallback";
+    reason?: "not-configured" | "unavailable";
+    model?: string;
+  };
 }
 
 export type GameAction =

@@ -5,6 +5,7 @@ import { getDatabase } from "../db/mongodb.ts";
 import { countries } from "../../data/countries.ts";
 import { GameEngine } from "./game-engine.ts";
 import { advanceNpc } from "../ai/npc-strategy.ts";
+import { addBattleCommentary } from "../ai/battle-commentary.ts";
 import type { GameAction, GameState } from "../../types/game.ts";
 
 interface SavedGame {
@@ -157,6 +158,7 @@ export async function handleGameRequest(request: Request, gameId?: string) {
     } catch (error) {
       throw new RequestError(400, error instanceof Error ? error.message : "That move is not allowed.");
     }
+    await addBattleCommentary(next, saved.state.events.length);
     // save only if no other tab has already changed this turn
     const result = await games.updateOne(
       { _id: gameId, ownerUserId, "state.revision": saved.state.revision },

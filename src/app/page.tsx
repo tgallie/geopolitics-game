@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AccountPanel } from "@/components/account-panel";
+import { BattleCommentary } from "@/components/battle-commentary";
 import { GameTutorial } from "@/components/game-tutorial";
 import { WorldGameMap } from "@/components/world-game-map";
 import { countries } from "@/data/countries";
@@ -264,6 +265,7 @@ function SavedGameScreen() {
                 <li key={event.sequence} className="rounded border border-zinc-300 p-3 dark:border-zinc-700">
                   <span className="font-semibold">Round {event.round}:</span> {event.message}
                   {event.dice && <span className="block text-sm">{event.dice.map((pair) => `${pair.attack} vs ${pair.defend} (${pair.winner})`).join(" · ")}</span>}
+                  <BattleCommentary event={event} />
                 </li>
               ))}
             </ol>
