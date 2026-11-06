@@ -11,7 +11,8 @@
     "test": "node --conditions=react-server --experimental-strip-types --test tests/*.test.mjs",
     "db:check": "node --conditions=react-server --experimental-strip-types scripts/check-database.mjs",
     "accounts:check": "node --conditions=react-server --experimental-strip-types scripts/check-accounts.mjs",
-    "saved-games:check": "node --conditions=react-server --experimental-strip-types scripts/check-saved-games.mjs"
+    "saved-games:check": "node --conditions=react-server --experimental-strip-types scripts/check-saved-games.mjs",
+    "ai:check": "node --conditions=react-server --experimental-strip-types scripts/check-ai.mjs"
   },
   "dependencies": {
     "@better-auth/mongo-adapter": "^1.7.15",

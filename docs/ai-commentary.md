@@ -11,3 +11,5 @@ Commentary is generated before the conditional game save. Concurrent requests ca
 Validation: npm test exercises response parsing, privacy, missing configuration, refusal, rate-limit failures, timeouts and unchanged game facts using a mocked provider. A live check with a configured key is still required before submission.
 
 Official references: https://developers.openai.com/api/docs/guides/text and https://developers.openai.com/api/docs/models/gpt-4.1-mini
+
+Run `npm run ai:check` for one live request using fictional battle facts. It never prints the API key. On 6 November 2026 the configured key reached OpenAI, but requests returned HTTP 429; live activation remains blocked by provider usage/rate limits.

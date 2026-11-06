@@ -3,6 +3,8 @@ import { randomUUID, randomBytes } from "node:crypto";
 import nextEnv from "@next/env";
 
 nextEnv.loadEnvConfig(process.cwd(), true);
+// keep integration checks repeatable without paid commentary requests
+process.env.AI_COMMENTARY_ENABLED = "false";
 const { getAuth } = await import("../src/lib/auth.ts");
 const { getDatabase, getMongoClient } = await import("../src/lib/db/mongodb.ts");
 const { handleGameRequest, handleShareRequest, handleWatchRequest } = await import("../src/lib/game/saved-games.ts");
