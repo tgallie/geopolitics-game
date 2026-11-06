@@ -1,0 +1,6 @@
+.vs/
+node_modules/
+.next/
+.env.local
+.env.browser-check.json
+scripts/

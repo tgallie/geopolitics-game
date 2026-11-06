@@ -43,3 +43,5 @@ next-env.d.ts
 
 # Visual Studio
 /.vs/
+.vercel
+.env*
