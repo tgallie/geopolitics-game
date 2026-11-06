@@ -1,25 +1,19 @@
-# Verification results — 6 November 2026
+# QA Results
 
-## Passed
-- All 31 automated tests: rules, validation, NPC decisions, complete ten-country conquest, commentary parsing/privacy/fallback/timeouts.
-- ESLint, TypeScript and production build checks.
-- Mobile welcome and sign-up navigation at 390px; no horizontal document overflow.
-- Earlier browser session: sign-in, country selection, NPC playback, tutorial pauses playback, battle resume after refresh, spectator updates and saved fallback commentary.
-- Earlier Atlas integration checks: account isolation, concurrent move conflict, public viewing and sharing revocation.
+## Latest Verification (6 November 2026)
 
-## Current blockers / not yet verified
-- Atlas connection now fails with a MongoServerSelectionError / TLS alert. Account UI correctly reports unavailability. Check current device IP in Atlas Network Access and cluster availability; no access rules were widened.
-- Cannot finish current browser logout/resume, sharing revocation, mobile gameplay or full browser playthrough until Atlas is reachable. Complete-game coverage above is automated engine coverage, not a manual browser playthrough.
-- OpenAI key is present privately. Live request reaches the API but returns HTTP 429. Check API credit/quota/rate limits. No successful live commentary claimed.
-- A temporary browser QA account from the earlier session still needs cleanup once Atlas is reachable: run scripts/browser-fixture.mjs cleanup with the same Node flags as other check scripts. Its local credential file is ignored by Git.
+### Environment & Integration
+- **MongoDB Atlas:** Successfully reconnected. `npm run db:check`, `npm run accounts:check`, and `npm run saved-games:check` all passed.
+- **AI Commentary:** Migrated from OpenAI to Google AI Studio (`gemini-3.1-flash-lite`) using the OpenAI-compatible endpoint. Added exponential backoff retry logic to handle 503 (high demand) errors. `npm run ai:check` passed with a live, successful AI response.
+- **Automated Tests:** All 31 automated tests passed.
+- **Code Quality:** ESLint, TypeScript checking, and production build all pass.
 
-## Repeat checks
-npm test
-npm run lint
-npx tsc --noEmit
-npm run db:check
-npm run accounts:check
-npm run saved-games:check
-npm run ai:check
+### Browser Verification (Manual)
+- **Authentication Cycle:** Logout, sign-in, and game resume verified.
+- **Spectator View:** Public viewing via incognito window verified. Live AI commentary successfully renders. Owner-controlled link revocation verified (spectator window stops updating).
+- **Mobile Layout:** Simulated at 390px width using browser DevTools. Welcome/sign-up navigation and gameplay layout verified with no horizontal document overflow. AI commentary boxes fit appropriately.
+- **AI Persistence:** Verified that AI commentary is saved to the database. Reloading the page and viewing via spectator link does not regenerate commentary; it reads the saved text.
 
-The AI check makes one small provider request (15-second diagnostic timeout); normal gameplay keeps its five-second timeout. Saved-game integration checks explicitly disable paid AI requests.
+### Outstanding / Pending
+- Full manual browser playthrough to victory (automated test already covers the 10-country conquest rules).
+- Test data cleanup (in progress/completed via `scripts/browser-fixture.mjs`).
